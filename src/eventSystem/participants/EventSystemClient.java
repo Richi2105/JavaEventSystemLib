@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  *
  * @author richard
  */
-public class EventSystemClient implements EventSystemParticipant, Runnable, Closeable
+public class EventSystemClient implements EventSystemParticipant, Runnable
 {
     private String id;
     private final SocketSlave socket;
@@ -33,11 +33,12 @@ public class EventSystemClient implements EventSystemParticipant, Runnable, Clos
     private int receivedByte;
     private boolean newData;
     private boolean dataFetched;
-    private SocketAddress masterAddress;
+    private SocketAddress myAddress;
     
     private final Object newMessageLock;
     private final Object newMessageAvailable;
     private final Object newMessageFetched;
+    private final AtomicBoolean running;
     
     public EventSystemClient(String id)
     {
@@ -51,39 +52,50 @@ public class EventSystemClient implements EventSystemParticipant, Runnable, Clos
         this.newMessageAvailable = new Object();
         this.newMessageFetched = new Object();
         this.messageThread = new Thread(this);
+        this.running = new AtomicBoolean(false);
     }
     
     public int connectToMaster()
     {
         if (this.socket.isLocal())
         {
-            SocketAddressLocal masterAddressLocal = (SocketAddressLocal)this.socket.getAddress();
-            this.masterAddress = masterAddressLocal;
-            RegisterLocal reg = new RegisterLocal(masterAddressLocal, this.id);
+            SocketAddressLocal myAddressLocal = (SocketAddressLocal)this.socket.getAddress();
+            this.myAddress = myAddressLocal;
+            RegisterLocal reg = new RegisterLocal(myAddressLocal, this.id);
             TelegramObject regTelegram = new TelegramObject(Telegram.ID_MASTER, reg);
             regTelegram.setType(Telegram.REGISTER);
             this.send(regTelegram);
-            this.messageThread.start();
             return 0;
         }
         else
         {
             return -1;
         }
-
     }
     
-    @Override
-    public void close() throws IOException {
+    public void startReceiving()
+    {
+        this.running.set(true);
+        this.messageThread.start();
+    }
+    
+    public void stopReceiving()
+    {
+        this.running.set(false);
+        this.disconnect();
+    }
+        
+    private void disconnect()
+    {
         TelegramObject regTelegram;
         if (this.socket.isLocal())
         {
-            RegisterLocal reg = new RegisterLocal((SocketAddressLocal)this.masterAddress, this.id);
+            RegisterLocal reg = new RegisterLocal((SocketAddressLocal)this.myAddress, this.id);
             regTelegram = new TelegramObject(Telegram.ID_MASTER, reg);
         }
         else
         {
-            RegisterLocal reg = new RegisterLocal((SocketAddressLocal)this.masterAddress, this.id);
+            RegisterLocal reg = new RegisterLocal((SocketAddressLocal)this.myAddress, this.id);
             regTelegram = new TelegramObject(Telegram.ID_MASTER, reg);
         }
                 
@@ -164,7 +176,7 @@ public class EventSystemClient implements EventSystemParticipant, Runnable, Clos
     public void run() {
         byte[] data = new byte[Constants.DATASIZE];
         
-        while (true)
+        while (running.get())
         {
             int bytes = this.socket.receive(data, Constants.DATASIZE);
             System.out.println(String.format("%d bytes received", bytes));
@@ -189,8 +201,7 @@ public class EventSystemClient implements EventSystemParticipant, Runnable, Clos
                         LoggerAdapter.log(Log.LOG_SEVERE, ex.toString());
                     }
                 }
-            }
-            
+            }            
         }
     }
     

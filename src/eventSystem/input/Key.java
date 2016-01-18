@@ -120,7 +120,7 @@ public class Key implements Serializeable {
     @Override
     public int serialize(byte[] data, int offset) {
         int i = offset;
-        for (int y=0; y < Constants.KEYDESCRIPTION_SIZE; y+=1)
+        for (int y=0; y < Integer.BYTES; y+=1)
         {
             data[i++] = (byte) (this.keyIdentifier >>> ((8*y)));
         }
@@ -132,7 +132,7 @@ public class Key implements Serializeable {
     public int deserialize(byte[] data, int offset) {
         int i = offset;
         this.keyIdentifier = 0;
-        for (int y=0; y < Constants.KEYDESCRIPTION_SIZE; y+=1)
+        for (int y=0; y < Integer.BYTES; y+=1)
         {
             this.keyIdentifier  += data[i++] << ((8*y));
         }        

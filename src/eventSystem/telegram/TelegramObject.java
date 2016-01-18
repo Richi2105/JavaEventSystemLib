@@ -49,7 +49,7 @@ public class TelegramObject extends Telegram
     @Override
     public int serialize(byte[] data) {
         int i = 0; 
-        i += super.serialize(data);
+        i += super.serialize(data, 0);
         
         i += this.object.serialize(data, i);
      
@@ -60,7 +60,7 @@ public class TelegramObject extends Telegram
     @Override
     public int serialize(byte[] data, int offset) {
         int i = offset;
-        i += super.serialize(data);
+        i += super.serialize(data, offset);
         
         i += this.object.serialize(data, i);
      
@@ -71,7 +71,7 @@ public class TelegramObject extends Telegram
     @Override
     public int deserialize(byte[] data) {
         int i = 0;
-        i += super.deserialize(data);
+        i += super.deserialize(data, 0);
         
         i += this.object.deserialize(data, i);
         
@@ -80,7 +80,7 @@ public class TelegramObject extends Telegram
 
     public int deserialize(byte[] data, Serializeable object) {
         int i = 0;        
-        i += super.deserialize(data);
+        i += super.deserialize(data, 0);
         
         this.object = object;
 
@@ -92,7 +92,7 @@ public class TelegramObject extends Telegram
     @Override
     public int deserialize(byte[] data, int offset) {
         int i = offset;
-        i += super.deserialize(data);
+        i += super.deserialize(data, offset);
         
         i += this.object.deserialize(data, i);
         
@@ -101,7 +101,7 @@ public class TelegramObject extends Telegram
 
     public int deserialize(byte[] data, Serializeable object, int offset) {
         int i = offset;        
-        i += super.deserialize(data);
+        i += super.deserialize(data, offset);
         
         this.object = object;
 

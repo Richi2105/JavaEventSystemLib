@@ -22,6 +22,11 @@ public static final int ID_SIZE = 20;
 public static final int UNIQUEID_SIZE = 30;
 
 /**
+ * the length of a function description (used by TokenDaemon)
+ */
+public static final int FUNCTIONDESCRIPTION_SIZE = 30;
+
+/**
  * max characters in a log message
  */
 public static final int LOG_MESSAGE_SIZE = 250;
